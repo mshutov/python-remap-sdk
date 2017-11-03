@@ -1,30 +1,26 @@
 from requests import get, post, delete
 
-from typing import Type
-
-from remap11.remap11.model.Resource import Resource
+from remap11.remap11.model.Descriptors import Desc
 
 
 class Client:
-    path = '/api/remap/1.1/'
-
-    def __init__(self, login, password, host='https://online.moysklad.ru'):
+    def __init__(self, login, password, host='https://online.moysklad.ru', path='/api/remap/1.1/'):
         self._login = login
         self._password = password
-        self._url = host + self.path
+        self._url = host + path
 
-    def list(self, entity: Type[Resource], limit=25, expand=''):
+    def list(self, entity: Desc, limit=25, expand=''):
         query_params = {'limit': limit, 'expand': expand}
         return get(
-            self._url + 'entity/' + entity.path(),
+            self._url + entity.path,
             auth=(self._login, self._password),
             params=query_params).json()
 
     def href(self, href: str):
         return get(href, auth=(self._login, self._password)).json()
 
-    def create_or_update(self, entity_type: Type[Resource], entity):
-        return post(self._url + 'entity/' + entity_type.path(), auth=(self._login, self._password), json=entity).json()
+    def create_or_update(self, entity_type: Desc, entity):
+        return post(self._url + entity_type.path, auth=(self._login, self._password), json=entity).json()
 
     def delete_by_href(self, href):
         headers = {'Content-type': 'application/json', 'Accept': 'application/json'}
